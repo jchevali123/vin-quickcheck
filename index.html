@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VIN Quick-Check Dashboard — Auction Buyer Edition (v2)</title>
+<style>
+ :root { --b:#111; --m:#666; --bd:#ddd; --bg:#f8f8f8; }
+ *{box-sizing:border-box}
+ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 18px; }
+ h1 { margin: 0 0 8px 0; }
+ .pill { display:inline-block; padding:3px 8px; border-radius:999px; border:1px solid var(--bd); font-size:12px; margin-left .tabs { display:flex; gap:8px; margin:14px 0; flex-wrap:wrap; }
+ .tab-btn { border:1px solid var(--bd); border-radius:8px; padding:8px 12px; background:#fff; cursor:pointer; }
+ .tab-btn.active { background:#eef6ff; border-color:#cfe6ff; }
+ .tab { display:none; }
+ .tab.active { display:block; }
+ .card { border:1px solid var(--bd); border-radius:10px; padding:14px; margin:12px 0; background:#fff; }
+ .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+ input[type="text"] { font-size:18px; padding:10px; width:320px; border-radius:8px; border:1px solid #ccc; }
+ button, a.action { padding:10px 14px; border-radius:8px; border:1px solid #ccc; background:#f5f5f5; text-decoration:none; co button.primary { background:#e6f3ff; border-color:#b3dbff; }
+ table { width:100%; border-collapse:collapse; margin-top:10px; }
+ th, td { border:1px solid #e5e5e5; padding:8px; text-align:left; font-size:14px; vertical-align:top; }
+ th { background:#fafafa; }
+ small.note { color: var(--m); }
+ .brand-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px; }
+ .brand-card { border:1px dashed #ccc; border-radius:8px; padding:10px; background:#fff; }
+ ul.tight li { margin-bottom:6px; }
+ .muted { color: var(--m); }
+</style>
+</head>
+<body>
+ <h1>VIN Quick-Check Dashboard <span class="pill">Auction Buyer Edition v2</span></h1>
+ <div class="tabs">
+ <button class="tab-btn active" data-tab="lookup">VIN Lookup</button>
+ <button class="tab-btn" data-tab="ksds">Hyundai/Kia KSDS Tips</button>
+ <button class="tab-btn" data-tab="programs">Known Programs (Cheat Sheet)</button>
+ </div>
+ <!-- TAB: VIN LOOKUP -->
+ <div class="tab active" id="lookup">
+ <div class="card">
+ <div class="row">
+ <label for="vin"><strong>VIN:</strong></label>
+ <input id="vin" type="text" placeholder="Enter 17-character VIN" maxlength="17" />
+ <button id="copyBtn" title="Copy VIN to clipboard">Copy VIN</button>
+ <button class="primary" id="nhtsaBtn" title="Check NHTSA recalls instantly">NHTSA Instant Check</button>
+ <span class="muted"><small class="note">NHTSA API requires internet access. VIN must be 17 chars.</small></span>
+ </div>
+ <div id="nhtsaResults" class="card" style="display:none; margin-top:12px;">
+ <strong>NHTSA Recall Results</strong>
+ <div id="nhtsaStatus" class="muted" style="margin-top:6px;"></div>
+ <table id="nhtsaTable" style="display:none;">
+ <thead>
+ <tr>
+ <th>Recall #</th>
+ <th>Component</th>
+ <th>Summary</th>
+ <th>Consequence</th>
+ <th>Remedy</th>
+ <th>Report Date</th>
+ </tr>
+ </thead>
+ <tbody></tbody>
+ </table>
+ <div style="margin-top:8px;">
+ <a id="nhtsaDeepLink" class="action" target="_blank" rel="noopener">Open NHTSA Recall Page</a>
+ </div>
+ </div>
+ </div>
+ <div class="card">
+ <strong>OEM Portals (Recalls / Campaigns / Extended Coverage)</strong>
+ <p class="muted"><small>Some OEM sites don’t accept VINs via URL. Use <em>Copy VIN</em>, then tap a brand to open its po <div class="brand-grid">
+ <div class="brand-card">
+ <strong>GM — Chevrolet / GMC / Buick / Cadillac</strong><br/>
+ <a class="action" id="gmLink" target="_blank" rel="noopener">Open GM Recall Lookup</a><br/>
+ <small class="note">my.gm.com/recalls (paste VIN)</small>
+ </div>
+ <div class="brand-card">
+ <strong>Ford / Lincoln</strong><br/>
+ <a class="action" id="fordLink" target="_blank" rel="noopener">Open Ford Recall Lookup</a><br/>
+ <small class="note">ford.com/support/recalls/ (paste VIN)</small>
+ </div>
+ <div class="brand-card">
+ <strong>Mopar — Dodge / Chrysler / Jeep / RAM</strong><br/>
+ <a class="action" id="moparLink" target="_blank" rel="noopener">Open Mopar Recall Lookup</a><br/>
+ <small class="note">mopar.com/.../recalls/search (paste VIN)</small>
+ </div>
+ <div class="brand-card">
+ <strong>Kia</strong><br/>
+ <a class="action" id="kiaLink" target="_blank" rel="noopener">Open Kia Recall Lookup</a><br/>
+ <small class="note">ksupport.kiausa.com/.../recallsearch (paste VIN)</small>
+ </div>
+ <div class="brand-card">
+ <strong>Hyundai</strong><br/>
+ <a class="action" id="hyundaiLink" target="_blank" rel="noopener">Open Hyundai Campaign Lookup</a><br/>
+ <small class="note">autoservice.hyundaiusa.com (paste VIN)</small>
+ </div>
+ <div class="brand-card">
+ <strong>Honda / Acura</strong><br/>
+ <a class="action" id="hondaLink" target="_blank" rel="noopener">Open Honda Recall Lookup</a><br/>
+ <small class="note">owners.honda.com/recalls (paste VIN)</small>
+ </div>
+ <div class="brand-card">
+ <strong>Toyota / Lexus</strong><br/>
+ <a class="action" id="toyotaLink" target="_blank" rel="noopener">Open Toyota Recall Lookup</a><br/>
+ <small class="note">toyota.com/recall (may accept ?vin=)</small>
+ </div>
+ </div>
+ </div>
+ </div>
+ <!-- TAB: KSD
+S TIPS -->
+ <div class="tab" id="ksds">
+ <div class="card">
+ <h3>Hyundai/Kia KSDS (Knock Sensor Detection System) — What to Verify</h3>
+ <ul class="tight">
+ <li><strong>Ask the dealer to confirm KSDS status</strong> for the VIN and whether the software update was performed.< <li>If KSDS was installed and a knock event is detected, many VINs qualify for <em>short-block replacement</em> under  <li><strong>Request VIS/Dealer printout</strong> showing campaign history and any <em>pending engine inspections</em> <li><strong>Listen for bearing knock</strong> on warm idle and do an oil inspection for metallic debris before bidding <li><strong>Business call:</strong> A VIN with confirmed KSDS coverage can convert a high-risk unit into a buy — but g </ul>
+ <p class="muted"><small>Note: Program terms change; always verify current eligibility by VIN on Hyundai/Kia portals.</sm </div>
+ </div>
+ <!-- TAB: KNOWN PROGRAMS -->
+ <div class="tab" id="programs">
+ <div class="card">
+ <h3>Known Programs & What to Ask (Cheat Sheet)</h3>
+ <table>
+ <thead>
+ <tr>
+ <th>Make/Model</th>
+ <th>Concern</th>
+ <th>Program Type</th>
+ <th>What to Ask Dealer</th>
+ </tr>
+ </thead>
+ <tbody>
+ <tr>
+ <td>Ford Fiesta/Focus (DPS6)</td>
+ <td>TCM / clutch driveability</td>
+ <td>Extended coverage (e.g., TCM)</td>
+ <td>Ask for program coverage by VIN (e.g., TCM), campaign history, and any active field actions.</td>
+ </tr>
+ <tr>
+ <td>Ford Escape/Fusion 1.6L EcoBoost</td>
+ <td>Coolant intrusion / engine damage</td>
+ <td>Field service actions / TSBs</td>
+ <td>Confirm if engine replacement/repairs were completed; check for open actions by VIN.</td>
+ </tr>
+ <tr>
+ <td>GM Equinox/Terrain 2.4L</td>
+ <td>Oil consumption / timing chain</td>
+ <td>Customer Satisfaction / Special Coverage (varies)</td>
+ <td>Ask for VIS report: special coverages applicable, prior engine timing/consumption repairs.</td>
+ </tr>
+ <tr>
+ <td>Hyundai/Kia (Theta II / 2.4 GDI)</td>
+ <td>Rod bearing / engine seizure</td>
+ <td>KSDS + extended engine coverage</td>
+ <td>Verify KSDS applied, eligibility for short-block replacement, and inspection status by VIN.</td>
+ </tr>
+ <tr>
+ <td>Honda Civic/CR■V 1.5T</td>
+ <td>Oil dilution</td>
+ <td>Product updates / TSBs (some extended coverage in regions)</td>
+ <td>Ask for any product update completion and warranty extensions tied to climate/region.</td>
+ </tr>
+ <tr>
+ <td>Toyota Camry (select years/engines)</td>
+ <td>Excessive oil use</td>
+ <td>CSP/TSB history varies by engine</td>
+ <td>Confirm if this VIN had consumption test/repairs; check for CSP eligibility by VIN.</td>
+ </tr>
+ <tr>
+ <td>Jeep/Chrysler (62TE, 9■speed)</td>
+ <td>Shift quality / failures</td>
+ <td>Software updates / module replacements</td>
+ <td>Ask for TSB history, latest calibrations, and module replacements shown in dealer records.</td>
+ </tr>
+ </tbody>
+ </table>
+ <p class="muted"><small>All items above are VIN- and build■specific. Treat the table as a prompt for the dealer to chec </div>
+ </div>
+<script>
+ // Tab logic
+ const tabBtns = document.querySelectorAll('.tab-btn');
+ const tabs = document.querySelectorAll('.tab');
+ tabBtns.forEach(btn => {
+ btn.addEventListener('click', () => {
+ tabBtns.forEach(b => b.classList.remove('active'));
+ tabs.forEach(t => t.classList.remove('active'));
+ btn.classList.add('active');
+ document.getElementById(btn.dataset.tab).classList.add('active');
+ });
+ });
+ function sanitizeVIN(v) { return (v || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0,17); }
+ const vinInput = document.getElementById('vin');
+ const copyBtn = document.getElementById('copyBtn');
+ const nhtsaBtn = document.getElementById('nhtsaBtn');
+ const nhtsaResults = document.getElementById('nhtsaResults');
+ const nhtsaStatus = document.getElementById('nhtsaStatus');
+ const nhtsaTable = document.getElementById('nhtsaTable');
+ const nhtsaDeepLink = document.getElementById('nhtsaDeepLink');
+ const gmLink = document.getElementById('gmLink');
+ const fordLink = document.getElementById('fordLink');
+ const moparLink = document.getElementById('moparLink');
+ const kiaLink = document.getElementById('kiaLink');
+ const hyundaiLink = document.getElementById('hyundaiLink');
+ const hondaLink = document.getElementById('hondaLink');
+ const toyotaLink = document.getElementById('toyotaLink');
+ function updateLinks() {
+ const vin = sanitizeVIN(vinInput.value);
+ nhtsaDeepLink.href = vin.length === 17 ? `https://www.nhtsa.gov/recalls?vin=${vin}` : "https://www.nhtsa.gov/recalls";
+ gmLink.href = "https://my.gm.com/recalls";
+ fordLink.href = "https://www.ford.com/support/recalls/";
+ moparLink.href = "https://www.mopar.com/en-us/my-vehicle/recalls/search.html";
+ kiaLink.href = "https://ksupport.kiausa.com/ConsumerAffairs/recallsearch";
+ hyundaiLink.href = "https://autoservice.hyundaiusa.com/campaignhome";
+ hondaLink.href = "https://owners.honda.com/service-maintenance/recalls";
+ toyotaLink.href = vin.length === 17 ? `https://www.toyota.com/recall?vin=${vin}` : "https://www.toyota.com/recall";
+ }
+ vinInput.addEventListener('input', updateLinks);
+ updateLinks();
+ copyBtn.addEventListener('c
+lick', async () => {
+ const vin = sanitizeVIN(vinInput.value);
+ if (vin.length !== 17) { alert("Please enter a 17-character VIN first."); return; }
+ try {
+ await navigator.clipboard.writeText(vin);
+ copyBtn.textContent = "Copied";
+ setTimeout(() => copyBtn.textContent = "Copy VIN", 1200);
+ } catch (e) {
+ alert("Could not copy VIN. Please copy manually.");
+ }
+ });
+ nhtsaBtn.addEventListener('click', async () => {
+ const vin = sanitizeVIN(vinInput.value);
+ nhtsaResults.style.display = "block";
+ nhtsaStatus.textContent = "";
+ nhtsaTable.style.display = "none";
+ document.querySelector("#nhtsaTable tbody").innerHTML = "";
+ if (vin.length !== 17) { nhtsaStatus.textContent = "Enter a valid 17-character VIN to check recalls."; return; }
+ nhtsaStatus.textContent = "Checking NHTSA…";
+ try {
+ const url = `https://api.nhtsa.gov/recalls/recallsByVin?vin=${vin}`;
+ const resp = await fetch(url);
+ if (!resp.ok) throw new Error("NHTSA API error");
+ const data = await resp.json();
+ const items = (data && data.results) ? data.results : [];
+ if (!items.length) { nhtsaStatus.textContent = "No recalls reported by NHTSA for this VIN (verify on OEM portal)."; retu nhtsaStatus.textContent = `${items.length} recall(s) found for VIN ${vin}.`;
+ const tbody = document.querySelector("#nhtsaTable tbody");
+ items.forEach(r => {
+ const tr = document.createElement('tr');
+ const td = (s) => { const x = document.createElement('td'); x.textContent = s || ""; return x; };
+ tr.appendChild(td(r.NHTSACampaignNumber));
+ tr.appendChild(td(r.Component));
+ tr.appendChild(td(r.Summary));
+ tr.appendChild(td(r.Conequence || r.Consequence));
+ tr.appendChild(td(r.Remedy));
+ tr.appendChild(td(r.ReportReceivedDate));
+ tbody.appendChild(tr);
+ });
+ nhtsaTable.style.display = "table";
+ } catch (e) {
+ console.error(e);
+ nhtsaStatus.textContent = "Error contacting NHTSA. Check your connection and try again.";
+ }
+ updateLinks();
+ });
+</script>
+</body>
+</html>
